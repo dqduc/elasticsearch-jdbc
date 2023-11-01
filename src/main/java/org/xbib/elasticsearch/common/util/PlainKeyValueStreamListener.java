@@ -290,7 +290,7 @@ public class PlainKeyValueStreamListener<K, V> implements KeyValueStreamListener
             }
             if (index == null || index.isEmpty()) {
                 map.put(head, new Values(map.get(head), value, isSequence));
-            else if (index.length() == 1 && ValueSeperators.contains(index)) {
+            } else if (index.length() == 1 && ValueSeperators.contains(index)) {
                 map.put(head, new Values(map.get(head), value, isSequence, Pattern.quote(index)));
             } else {
                 if (!map.containsKey(head)) {
