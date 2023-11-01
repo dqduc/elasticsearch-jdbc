@@ -41,6 +41,19 @@ public class Values<O extends Object> implements ToXContent {
      */
     @SuppressWarnings({"unchecked"})
     public Values(Object old, O value, boolean sequence) {
+        this(old, value, sequence, ",");
+    }
+
+    /**
+     * Create new Values from an existing values by appending a value.
+     *
+     * @param old      existing values or null if values should be created
+     * @param value    a new value
+     * @param sequence true if value should be splitted by splitter to multiple values
+     * @param splitter Splitter for multiple values
+     */
+    @SuppressWarnings({"unchecked"})
+    public Values(Object old, O value, boolean sequence, String splitter) {
         if (old instanceof Values) {
             O[] vals = (O[]) ((Values) old).getValues();
             if (vals != null) {
@@ -49,7 +62,7 @@ public class Values<O extends Object> implements ToXContent {
         }
         O[] newValues;
         if (sequence && value != null) {
-            newValues = (O[]) value.toString().split(",");
+            newValues = (O[]) value.toString().split(splitter);
         } else if (value instanceof Object[]) {
             newValues = (O[]) value;
         } else {
