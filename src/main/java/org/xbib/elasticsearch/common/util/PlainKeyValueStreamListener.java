@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 public class PlainKeyValueStreamListener<K, V> implements KeyValueStreamListener<K, V> {
-    private final static String ValueSeperators = ",|;~!@#$%^&";
+    private final static String ValueSeperators = ",;|/~!@#$%^&";
     private final static Pattern p = Pattern.compile("^(.*)\\[(.*?)\\]$");
 
     /**
@@ -291,6 +291,7 @@ public class PlainKeyValueStreamListener<K, V> implements KeyValueStreamListener
             if (index == null || index.isEmpty()) {
                 map.put(head, new Values(map.get(head), value, isSequence));
             } else if (index.length() == 1 && ValueSeperators.contains(index)) {
+				// Use difference seperator, pass it as Pattern.quote(index) since Values use String.split
                 map.put(head, new Values(map.get(head), value, isSequence, Pattern.quote(index)));
             } else {
                 if (!map.containsKey(head)) {

@@ -67,6 +67,8 @@ public class StandardSink<C extends StandardContext> implements Sink<C> {
     protected String type;
 
     protected String id;
+	
+	protected boolean docAsUpsert;
 
     private final static SinkMetric sinkMetric = new SinkMetric().start();
 
@@ -96,6 +98,7 @@ public class StandardSink<C extends StandardContext> implements Sink<C> {
         Settings settings = context.getSettings();
         String index = settings.get("index", "jdbc");
         String type = settings.get("type", "jdbc");
+		this.docAsUpsert = settings.getAsBoolean("docAsUpsert", false);
         if (clientAPI == null) {
             clientAPI = createClient(settings);
             if (clientAPI.client() != null) {
@@ -276,10 +279,11 @@ public class StandardSink<C extends StandardContext> implements Sink<C> {
             setId(object.id());
         }
         if (getId() == null) {
-            return; // skip if no doc is specified to delete
+            return; // skip if no doc is specified to update
         }
         UpdateRequest request = new UpdateRequest().index(this.index).type(this.type).id(getId()).doc(object.source());
-        request.docAsUpsert(true);
+		if (this.docAsUpsert)
+			request.docAsUpsert(true);
 
         if (object.meta(ControlKeys._version.name()) != null) {
             request.versionType(VersionType.EXTERNAL)
@@ -292,7 +296,7 @@ public class StandardSink<C extends StandardContext> implements Sink<C> {
             request.parent(object.meta(ControlKeys._parent.name()));
         }
         if (logger.isTraceEnabled()) {
-            logger.trace("adding bulk update action {}/{}/{}", request.index(), request.type(), request.id());
+            logger.trace("adding bulk update action {}/{}/{} docAsUpsert {}", request.index(), request.type(), request.id(), this.docAsUpsert);
         }
         clientAPI.bulkUpdate(request);
     }
