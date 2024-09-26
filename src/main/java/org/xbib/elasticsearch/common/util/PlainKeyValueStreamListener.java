@@ -291,6 +291,7 @@ public class PlainKeyValueStreamListener<K, V> implements KeyValueStreamListener
             if (index == null || index.isEmpty()) {
                 map.put(head, new Values(map.get(head), value, isSequence));
             } else if (index.length() == 1 && ValueSeperators.contains(index)) {
+				// Or check not a letter nor number: !Character.isLetter(index.charAt(0))
 				// Use difference seperator, pass it as Pattern.quote(index) since Values use String.split
                 map.put(head, new Values(map.get(head), value, isSequence, Pattern.quote(index)));
             } else {

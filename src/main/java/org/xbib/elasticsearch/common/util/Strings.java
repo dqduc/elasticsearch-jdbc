@@ -15,6 +15,11 @@
  */
 package org.xbib.elasticsearch.common.util;
 
+import org.elasticsearch.common.io.Streams;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -197,4 +202,19 @@ public final class Strings {
         return buf.toString();
     }
 
+    public static String readStringFromFile(String filePath) {
+        if (filePath == null)
+            return null;
+
+        try {
+            Reader r = new InputStreamReader(new FileInputStream(filePath), "UTF-8");
+            String rawData = Streams.copyToString(r);
+            r.close();
+            return rawData;
+        } catch (IOException err) {
+            //NOTE: Need log
+        }
+
+        return null;
+    }
 }

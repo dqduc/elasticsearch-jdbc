@@ -152,6 +152,7 @@ public class JDBCImporter
             logger.error(e.getMessage(), e);
         } finally {
             try {
+                // NOTE: https://github.com/jprante/elasticsearch-jdbc/issues/921 ?
             	executorService.shutdown();
                 if (!executorService.awaitTermination(15, TimeUnit.SECONDS)) {
                     executorService.shutdownNow();

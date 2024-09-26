@@ -77,6 +77,14 @@ public interface JDBCSource<C extends Context> extends Source<C> {
     JDBCSource<C> setPassword(String password);
 
     /**
+     * Set the password file contain password for authentication
+     *
+     * @param passwordFile the password file
+     * @return this source
+     */
+    JDBCSource<C> setPasswordFile(String passwordFile);
+
+    /**
      * Set scale of big decimal values.  See java.math.BigDecimal#setScale
      *
      * @param scale the scale of big decimal values

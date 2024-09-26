@@ -66,7 +66,9 @@ public class SinkKeyValueStreamListener<K, V> extends PlainKeyValueStreamListene
             } else if ("create".equals(object.optype())) {
                 output.index(object, true);
             } else if ("update".equals(object.optype())) {
-                output.update(object);
+                output.update(object, false);
+            } else if ("upsert".equals(object.optype())) {
+                output.update(object, true); //NOTE: support explicit upsert ?
             } else if ("delete".equals(object.optype())) {
                 output.delete(object);
             } else {

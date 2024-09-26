@@ -25,9 +25,13 @@ import org.xbib.elasticsearch.common.util.ExceptionFormatter;
 import org.xbib.elasticsearch.common.metrics.SourceMetric;
 import org.xbib.elasticsearch.jdbc.strategy.JDBCSource;
 import org.xbib.elasticsearch.common.util.SinkKeyValueStreamListener;
+import org.xbib.elasticsearch.common.util.Strings;
 import org.xbib.elasticsearch.common.util.SQLCommand;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.math.BigDecimal;
 import java.sql.Array;
 import java.sql.Blob;
@@ -80,6 +84,8 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
     protected String user;
 
     protected String password;
+
+    protected String passwordFile;
 
     protected Connection readConnection;
 
@@ -188,6 +194,12 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
     @Override
     public StandardSource<C> setPassword(String password) {
         this.password = password;
+        return this;
+    }
+
+    @Override
+    public StandardSource<C> setPasswordFile(String passwordFile) {
+        this.passwordFile = passwordFile;
         return this;
     }
 
@@ -446,6 +458,11 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
         return this;
     }
 
+    protected String resolveSettingValue(String rawValue)
+    {
+        return rawValue;
+    }
+
     public boolean shouldTreatBinaryAsString() {
         return shouldTreatBinaryAsString;
     }
@@ -478,6 +495,9 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
                         properties.put("user", user);
                         if (password != null) {
                             properties.put("password", password);
+                        }
+                        if (passwordFile != null) {
+                            properties.put("password", Strings.readStringFromFile(passwordFile));
                         }
                         if (getConnectionProperties() != null) {
                             properties.putAll(getConnectionProperties());
@@ -542,6 +562,9 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
                         properties.put("user", user);
                         if (password != null) {
                             properties.put("password", password);
+                        }
+                        if (passwordFile != null) {
+                            properties.put("password", Strings.readStringFromFile(passwordFile));
                         }
                         if (getConnectionProperties() != null) {
                             properties.putAll(getConnectionProperties());

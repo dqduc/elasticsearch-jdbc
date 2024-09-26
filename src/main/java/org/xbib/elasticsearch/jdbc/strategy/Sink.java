@@ -129,9 +129,10 @@ public interface Sink<C extends Context> {
      * Update operation. Indicating that an object should be updated.
      *
      * @param object the structured object
-     * @throws IOException when delete fails
+     * @param create true if the document should be upserted
+     * @throws IOException when update fails
      */
-    void update(IndexableObject object) throws IOException;
+    void update(IndexableObject object, boolean upsert) throws IOException;
 
     /**
      * Flush data to the sink

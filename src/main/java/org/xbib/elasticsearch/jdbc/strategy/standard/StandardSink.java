@@ -208,6 +208,8 @@ public class StandardSink<C extends StandardContext> implements Sink<C> {
                 .type(this.type)
                 .id(getId())
                 .source(object.build());
+        if (create)
+            request.opType(IndexRequest.OpType.CREATE);
         if (object.meta(ControlKeys._version.name()) != null) {
             request.versionType(VersionType.EXTERNAL)
                     .version(Long.parseLong(object.meta(ControlKeys._version.name())));
@@ -265,7 +267,7 @@ public class StandardSink<C extends StandardContext> implements Sink<C> {
     }
 
     @Override
-    public void update(IndexableObject object) throws IOException {
+    public void update(IndexableObject object, boolean upsert) throws IOException {
         if (clientAPI == null) {
             return;
         }
@@ -282,7 +284,7 @@ public class StandardSink<C extends StandardContext> implements Sink<C> {
             return; // skip if no doc is specified to update
         }
         UpdateRequest request = new UpdateRequest().index(this.index).type(this.type).id(getId()).doc(object.source());
-		if (this.docAsUpsert)
+		if (this.docAsUpsert || upsert)
 			request.docAsUpsert(true);
 
         if (object.meta(ControlKeys._version.name()) != null) {
@@ -296,7 +298,7 @@ public class StandardSink<C extends StandardContext> implements Sink<C> {
             request.parent(object.meta(ControlKeys._parent.name()));
         }
         if (logger.isTraceEnabled()) {
-            logger.trace("adding bulk update action {}/{}/{} docAsUpsert {}", request.index(), request.type(), request.id(), this.docAsUpsert);
+            logger.trace("adding bulk update action {}/{}/{} upsert {}", request.index(), request.type(), request.id(), this.docAsUpsert || upsert);
         }
         clientAPI.bulkUpdate(request);
     }

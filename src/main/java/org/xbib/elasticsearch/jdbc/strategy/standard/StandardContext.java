@@ -211,14 +211,19 @@ public class StandardContext<S extends JDBCSource> implements Context<S, Sink> {
             setThrowable(e);
             logger.error("after fetch: " + e.getMessage(), e);
         }
+
+        // Log last metrics info if any
+        log();
     }
 
     @Override
     public void shutdown() {
+        
         logger.info("shutdown in progress");
         for (Future future : futures) {
             future.cancel(true);
         }
+        
         if (source != null) {
             try {
                 source.shutdown();
@@ -233,6 +238,7 @@ public class StandardContext<S extends JDBCSource> implements Context<S, Sink> {
                 logger.error("sink shutdown: " + e.getMessage(), e);
             }
         }
+        
         logger.info("shutdown completed");
         writeState();
     }
@@ -283,11 +289,13 @@ public class StandardContext<S extends JDBCSource> implements Context<S, Sink> {
         String url = settings.get("url");
         String user = settings.get("user");
         String password = settings.get("password");
+        String passwordFile = settings.get("passwordFile");
         String locale = settings.get("locale", LocaleUtil.fromLocale(Locale.getDefault()));
         String timezone = settings.get("timezone", TimeZone.getDefault().getID());
         source.setUrl(url)
                 .setUser(user)
                 .setPassword(password)
+                .setPasswordFile(passwordFile)
                 .setLocale(LocaleUtil.toLocale(locale))
                 .setTimeZone(TimeZone.getTimeZone(timezone));
         return source;
