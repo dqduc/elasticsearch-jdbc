@@ -28,6 +28,7 @@ import org.xbib.elasticsearch.common.util.SinkKeyValueStreamListener;
 import org.xbib.elasticsearch.common.util.Strings;
 import org.xbib.elasticsearch.common.util.SQLCommand;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -74,6 +75,8 @@ import java.util.TimeZone;
  * the other for writing.
  */
 public class StandardSource<C extends StandardContext> implements JDBCSource<C> {
+    public static final String ENV_PREFIX = "env:";
+    public static final String VAR_PREFIX = "var:";
 
     private final static Logger logger = LogManager.getLogger("importer.jdbc.source.standard");
 
@@ -458,8 +461,21 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
         return this;
     }
 
-    protected String resolveSettingValue(String rawValue)
+    protected String resolveSettingValue(String rawValue, boolean supportFileContent)
     {
+        if (rawValue == null)
+            return null;
+
+        if (rawValue.startsWith(ENV_PREFIX))
+            return System.getenv(rawValue.substring(ENV_PREFIX.length()));
+
+        if (supportFileContent) {
+            File file = new File(rawValue);
+            if (file.exists() && file.isFile() && file.canRead()) {
+                return Strings.readStringFromFile(rawValue);
+            }
+        }
+
         return rawValue;
     }
 
@@ -497,7 +513,10 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
                             properties.put("password", password);
                         }
                         if (passwordFile != null) {
-                            properties.put("password", Strings.readStringFromFile(passwordFile));
+                            properties.put("password", resolveSettingValue(passwordFile, true));
+                            if (logger.isTraceEnabled()) {
+                                logger.trace("passwordFile forReading resolved={}", properties.get("password"));
+                            }
                         }
                         if (getConnectionProperties() != null) {
                             properties.putAll(getConnectionProperties());
@@ -564,7 +583,10 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
                             properties.put("password", password);
                         }
                         if (passwordFile != null) {
-                            properties.put("password", Strings.readStringFromFile(passwordFile));
+                            properties.put("password", resolveSettingValue(passwordFile, true));
+                            if (logger.isTraceEnabled()) {
+                                logger.trace("passwordFile forWriting resolved={}", properties.get("password"));
+                            }
                         }
                         if (getConnectionProperties() != null) {
                             properties.putAll(getConnectionProperties());
